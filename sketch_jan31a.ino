@@ -10,21 +10,25 @@ int iByte = 6;
 const int rs = 11, en = 12, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
-typedef struct {
+struct Stock {
   String stock; //char can also be a fixed length string like char fruit[16];
   int count;
   float price;
   int rsi[6];
   int ledVals[6];
-} Stock;
-
-Stock stocks[3] = {
-  {"AAPL",2, 140.97, [60,78,50,28,35,90],  [10, 20, 18, 15, 19, 20, 18]},
-  {"TSLA",6, 744.12, [60,78,50,28,35,90],  [10, 20, 18, 15, 19, 20, 18]};
-  {"MSFT",3,64.75, [60,78,50,28,35,90],  [10, 20, 18, 15, 19, 20, 18]};
 };
+Stock stocks[3];
 
-int stockIndex = 0, rsiIndex = 0, ledIndex = 0;
+//Stock stocks[3] = {
+//  {"AAPL", 2, 140.97, [60,78,50,28,35,90],  [10, 20, 18, 15, 19, 20, 18]},
+//  {"TSLA",6, 744.12, [60,78,50,28,35,90],  [10, 20, 18, 15, 19, 20, 18]};
+//  {"MSFT",3,64.75, [60,78,50,28,35,90],  [10, 20, 18, 15, 19, 20, 18]};
+//};
+
+
+
+
+int stockIndex = 0, index = 0;
 int prevLEDVal = 0;
 int prevRSIVal = 0;
 
@@ -38,6 +42,15 @@ void setup() {
   lcd.begin(16, 2);
   lcd.setCursor(0, 1);
   lcd.clear();
+
+  
+  
+  stocks[0].stock = "AAPL";
+  stocks[0].count = 2;
+  stocks[0].price = 3;
+  int temp[6] = {60,78,50,28,35,90};
+  stocks[0].rsi = temp;
+//  stocks[0].ledVals =[10, 20, 18, 15, 19, 20, 18];
 }
 
 
@@ -123,27 +136,35 @@ void loop() {
 
 
  //led output
- if (prevLEDVal > stocks[stockIndex].ledVals[ledIndex]) { //red 
+ if (prevLEDVal > stocks[stockIndex].ledVals[index]) { //red 
       ledSystem(0);
   } else { //green
       ledSystem(1);
   }
-  prevLEDVal = stocks[stockIndex].ledVals[ledIndex];
+  prevLEDVal = stocks[stockIndex].ledVals[index];
 
-  //index validations
-  if (stockIndex == 5){
-    i = 0;
-  } else {
-    i++; 
-  }
+  
 
   //RSI output
-  if (stocks[stockIndex].ledVals[ledIndex] >= 30) { //red 
+  if (stocks[stockIndex].rsi[index] >= 30) { //red 
       //buy
       notificationSystem(1);
-  } else if (stocks[stockIndex].ledVals[ledIndex] >= 70) { //green
+  } else if (stocks[stockIndex].rsi[index] >= 70) { //green
      notificationSystem(0);
   }
+
+  //index validations
+  if (stockIndex == 3){
+    stockIndex = 0;
+  } else {
+    stockIndex++; 
+  }
+  if (index == 5){
+    index = 0;
+  } else {
+    index++; 
+  }
+  
 
   //portfolio
   if (<insert condition>) {
