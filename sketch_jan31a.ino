@@ -18,15 +18,7 @@ typedef struct {
   int ledVals[6];
 } Stock;
 
-
-typedef struct
-  {
-      int one;
-      int two;
-      int three;
-  }  record_type;
-
-Stock stock[3] = {
+Stock stocks[3] = {
   {"AAPL",2, 140.97, [60,78,50,28,35,90],  [10, 20, 18, 15, 19, 20, 18]},
   {"TSLA",6, 744.12, [60,78,50,28,35,90],  [10, 20, 18, 15, 19, 20, 18]};
   {"MSFT",3,64.75, [60,78,50,28,35,90],  [10, 20, 18, 15, 19, 20, 18]};
@@ -146,11 +138,22 @@ void loop() {
   }
 
   //RSI output
-  if (stocks[stockIndex].ledVals[ledIndex] >= 30) { 
+  if (stocks[stockIndex].ledVals[ledIndex] >= 30) { //red 
       //buy
       notificationSystem(1);
-  } else if (stocks[stockIndex].ledVals[ledIndex] >= 70) {
+  } else if (stocks[stockIndex].ledVals[ledIndex] >= 70) { //green
      notificationSystem(0);
+  }
+
+  //portfolio
+  if (<insert condition>) {
+    for (int i = 0; i < stocks.size(); i++) {
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print(stocks[i].stocks);
+      lcd.setCursor(0,1);
+      lcd.print(stocks[i].count, stocks[i].price);
+    }
   }
 
   delay(5);
