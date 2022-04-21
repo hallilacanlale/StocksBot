@@ -14,7 +14,8 @@ typedef struct {
   String stock; //char can also be a fixed length string like char fruit[16];
   int count;
   float price;
-  int rsi[6] = {60,78,50,28,35,90};
+  int rsi[6];
+  int ledVals[6];
 } Stock;
 
 
@@ -25,14 +26,16 @@ typedef struct
       int three;
   }  record_type;
 
-Stock stock[3];
+Stock stock[3] = {
+  {"AAPL",2, 140.97, [60,78,50,28,35,90],  [10, 20, 18, 15, 19, 20, 18]},
+  {"TSLA",6, 744.12, [60,78,50,28,35,90],  [10, 20, 18, 15, 19, 20, 18]};
+  {"MSFT",3,64.75, [60,78,50,28,35,90],  [10, 20, 18, 15, 19, 20, 18]};
+};
 
-record[2] = (record_type) {1,2,3}
+int stockIndex = 0, rsiIndex = 0, ledIndex = 0;
+int prevLEDVal = 0;
+int prevRSIVal = 0;
 
-
-ledVals = [10, 20, 18, 15, 19, 20, 18];
-int i = 0;
-int prevVal = 0;
 
 
 void setup() {
@@ -47,8 +50,8 @@ void setup() {
 
 
 
-void notificationSystem(int iByte) {
-  if(iByte - '0' == 3)  {
+void notificationSystem(int val) {
+  if(val == 1)  { // buy
     lcd.clear();
     lcd.print("BUY!!");
     tone(buzzer, 1000); // Send 1KHz sound signal...
@@ -57,7 +60,7 @@ void notificationSystem(int iByte) {
     delay(1000);        // ...for 1sec
   }
 
-  else if(iByte - '0' == 4)  {
+  else if(val == 0)  { // sell
     lcd.clear();
     lcd.print("SELL!!");
     tone(buzzer, 1000); // Send 1KHz sound signal...
@@ -107,19 +110,49 @@ void loop() {
   }
   Serial.print(message);
 
+//typedef struct {
+//  String stock; //char can also be a fixed length string like char fruit[16];
+//  int count;
+//  float price;
+//  int rsi[6];
+//  int ledVals[6];
+//} Stock;
 
-  if (prevVal > ledVals[i]) { //red 
+
+//Stock stock[3] = {
+//  {"AAPL",2, 140.97, [60,78,50,28,35,90],  [10, 20, 18, 15, 19, 20, 18]},
+//  {"TSLA",6, 744.12, [60,78,50,28,35,90],  [10, 20, 18, 15, 19, 20, 18]};
+//  {"MSFT",3,64.75, [60,78,50,28,35,90],  [10, 20, 18, 15, 19, 20, 18]};
+//};
+//
+//int stockIndex = 0, rsiIndex = 0, ledIndex = 0;
+//int prevLEDVal = 0;
+//int prevRSIVal = 0;
+
+
+ //led output
+ if (prevLEDVal > stocks[stockIndex].ledVals[ledIndex]) { //red 
       ledSystem(0);
   } else { //green
       ledSystem(1);
   }
-  prevVal = ledVals[i];
+  prevLEDVal = stocks[stockIndex].ledVals[ledIndex];
 
-  if (i == ledVals.size()){
+  //index validations
+  if (stockIndex == 5){
     i = 0;
   } else {
     i++; 
   }
+
+  //RSI output
+  if (stocks[stockIndex].ledVals[ledIndex] >= 30) { 
+      //buy
+      notificationSystem(1);
+  } else if (stocks[stockIndex].ledVals[ledIndex] >= 70) {
+     notificationSystem(0);
+  }
+
   delay(5);
   
 //
