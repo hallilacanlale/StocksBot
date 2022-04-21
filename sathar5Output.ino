@@ -1,120 +1,94 @@
-#include <SPI.h>
-#include <MFRC522.h>
 #include <LiquidCrystal.h>
-#define SS_PIN 10
-byte iByte;
-#define RST_PIN 9
-MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
+int datafromUser;
 
-int datafromUser = 5;
-int prevTime = 0;
-
+const int buzzer = 10;
 const int RedLED = 9;
 const int GreenLED = 8;
 
-const int RedBUTTON = 2;     
-const int YellowBUTTON = 3;
+int iByte = 6;
 
-const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+const int rs = 11, en = 12, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
-
 
 void setup() {
   Serial.begin(9600);
   pinMode(RedLED,OUTPUT);
   pinMode(GreenLED,OUTPUT);
+  pinMode(buzzer, OUTPUT); // Set buzzer - pin 9 as an out
   lcd.begin(16, 2);
   lcd.setCursor(0, 1);
-  
-//  // initialize the pushbuttons pin as an input:
-//  pinMode(RedBUTTON, INPUT);
-//  pinMode(YellowBUTTON, INPUT);
-//
-//
-//  SPI.begin();      // Initiate  SPI bus
-//  mfrc522.PCD_Init();   // Initiate MFRC522
-//  Serial.println("Approximate your card to the reader...");
+  lcd.clear();
 }
 
 
-void loop() {   
-  
-  if(Serial.available() > 0)  {
-      iByte = Serial.read();
-      Serial.write(iByte);
-  }
-  
-//  if (iByte - '0' == 1) {
-//    digitalWrite( GreenLED , HIGH );
-//  }
-//  
-//  if (iByte - '0' == 0) {
-//    digitalWrite( RedLED , HIGH );
-//  }
-//  delay(1000);
 
-   
-  if(iByte - '0' == 0)
-  {
+void notificationSystem(int iByte) {
+  if(iByte - '0' == 3)  {
     lcd.clear();
-    digitalWrite(RedLED, LOW);
-    digitalWrite( GreenLED , HIGH );
-    lcd.print("AAPL went up");
-    
+    lcd.print("BUY!!");
+    tone(buzzer, 1000); // Send 1KHz sound signal...
+    delay(1000);        // ...for 1 sec
+    noTone(buzzer);     // Stop sound...
+    delay(1000);        // ...for 1sec
   }
-  else if(iByte - '0' == 1)
-  {
+
+  else if(iByte - '0' == 4)  {
     lcd.clear();
-    digitalWrite(RedLED, HIGH);
-    digitalWrite( GreenLED, LOW);
-    lcd.print("AAPL went down");
+    lcd.print("SELL!!");
+    tone(buzzer, 1000); // Send 1KHz sound signal...
+    delay(1000);        // ...for 1 sec
+    noTone(buzzer);     // Stop sound...
+    delay(1000);        // ...for 1sec
   }
   
-//
-//    if (digitalRead(GreenLED) == HIGH) {
-//      lcd.print("AAPL went up");
-//    }
-//
-//    if (digitalRead(RedLED) == HIGH) {
-//      lcd.print("AAPL went down");
-//    }
-//
-//
-//    // Look for new cards
-//  if ( ! mfrc522.PICC_IsNewCardPresent()) 
-//  {
-//    return;
-//  }
-//  // Select one of the cards
-//  if ( ! mfrc522.PICC_ReadCardSerial()) 
-//  {
-//    return;
-//  }
-//  //Show UID on serial monitor
-//  Serial.print("UID tag :");
-//  String content= "";
-//  byte letter;
-//  for (byte i = 0; i < mfrc522.uid.size; i++) 
-//  {
-//     Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
-//     Serial.print(mfrc522.uid.uidByte[i], HEX);
-//     content.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
-//     content.concat(String(mfrc522.uid.uidByte[i], HEX));
-//  }
-//  Serial.println();
-//  Serial.print("Message : ");
-//  content.toUpperCase();
-//  if (content.substring(1) == "70 60 48 A8") //change here the UID of the card/cards that you want to give access
-//  {
-//    Serial.println("Authorized access");
-//    Serial.println();
-//    delay(3000);
-//  }
-// 
-// else   {
-//    Serial.println(" Access denied");
-//    delay(3000);
-//  }
+  
 }
 
- 
+void ledSystem(int iByte) {
+  if(iByte - '0' == 0)  {
+      digitalWrite(RedLED, LOW);
+      lcd.clear();
+      lcd.print("AAPL went up");
+      digitalWrite( GreenLED , HIGH );
+      delay(800); 
+      digitalWrite(GreenLED, LOW);    // turn the LED off by making the voltage LOW
+      delay(800); 
+    }
+    else if(iByte - '0' == 1)  {
+      digitalWrite( GreenLED, LOW);
+      lcd.clear();
+      lcd.print("AAPL went down");
+      digitalWrite(RedLED, HIGH);
+      delay(800);                       // wait for a second
+      digitalWrite(RedLED, LOW);    // turn the LED off by making the voltage LOW
+      delay(800); 
+    }
+}
+
+const int length = 12;
+
+void loop() {
+  static char message[length];
+  static int message_pos = 0;
+  while (Serial.available() > 0){
+    char inByte = Serial.read();
+    if (inByte != ';' && (message_pos < length -1) ) {
+      message[message_pos] = inByte;
+      message_pos++;    
+    } else {
+      message[message_pos] = '\0';
+      message_pos = 0;
+    }
+  }
+  Serial.print(message);
+//
+//  if (strcmp(message, "red") == 0) {
+//    lcd.clear();
+//    lcd.print("yo");
+  
+//    if(Serial.available() > 0)  {
+//      iByte = Serial.read();
+//    }
+//    ledSystem(iByte);
+//    notificationSystem(iByte);
+}
