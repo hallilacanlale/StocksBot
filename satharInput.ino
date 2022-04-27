@@ -1,81 +1,66 @@
 #include <SPI.h>
 #include <MFRC522.h>
 #define SS_PIN 10
-int iByte = 6;
 #define RST_PIN 9
-MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
-#include <SoftwareSerial.h>
+MFRC522 mfrc522(SS_PIN, RST_PIN); 
+
 const int RedBUTTON = 2;
 const int YellowBUTTON = 3;
 
-int buttonState1 = 0;
-int buttonState2 = 0;
-SoftwareSerial portOne(11, 10);
-int lastButtonState1 = 0;
-int lastButtonState2 = 0;
-const int length = 15;
+
+int buttonState1;
+int buttonState2;
+int buttonLast1;
+int buttonLast2;
+
 void setup() {
   Serial.begin(9600);
-  portOne.begin(9600);
+  SPI.begin();      // Initiate  SPI bus
+  mfrc522.PCD_Init();   // Initiate MFRC522
   pinMode(RedBUTTON, INPUT);
   pinMode(YellowBUTTON, INPUT);
-  
 }
 
 void loop() {
-//  buttonState1 = digitalRead(RedBUTTON);
-//  buttonState2 = digitalRead(YellowBUTTON);
+  buttonState1 = digitalRead(RedBUTTON);
 
-//  if (buttonState1 != lastButtonState1) {
-//    if (buttonState1 == HIGH) {
-//      Serial.write("red;");
-//    } else {
-//      Serial.write("notred;");
-//    }
-//  }
-//  
-//  if (buttonState2 != lastButtonState2) {
-//    if (buttonState2 == HIGH) {
-//      Serial.write("yellow;");
-//    } else {
-//      Serial.write("notyellow;");
-//    }
-//    
-//  }
+  if (buttonState1 && !buttonLast1) {
+      Serial.write("red\n");
+  } else {
+    Serial.write("notred\n");
+  }
+  
+  buttonState2 = digitalRead(YellowBUTTON);
 
+  if (buttonState2 && !buttonLast2) {
+      Serial.write("yellow\n");
+    } else {
+      Serial.write("notyellow\n");
+  }
   
 
-  if(portOne.available() > 0)  {
-      iByte = portOne.read();
-      if(iByte - '0' == 0)  {
-        Serial.write("profit;");    
-      } else if (iByte - '0' == 1)  {
-        Serial.write("loss;");  
-      } else if (iByte - '0' == 3)  {
-        Serial.write("buy;");
-      } else if (iByte - '0' == 4)  {
-        Serial.write("sell;");
-      }
-
-
-//      static char message[length];
-//      static int message_pos = 0;
-//      while (Serial.available() > 0){
-//        char inByte = Serial.read();
-//        if (inByte != '\n' && (message_pos < length -1) ) {
-//          message[message_pos] = inByte;
-//          message_pos++;    
-//        } else {
-//          message[message_pos] = '\0';
-//          message_pos = 0;
-//        }
-//      }
-//      Serial.write(message);
+  buttonLast1  = buttonState1;
+  buttonLast2 = buttonState2;
+  
+  // Select one of the cards
+  if (mfrc522.PICC_ReadCardSerial()){
+    //Show UID on serial monitor
+    String content= "";
+    byte letter;
+    for (byte i = 0; i < mfrc522.uid.size; i++) {
+       content.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
+       content.concat(String(mfrc522.uid.uidByte[i], HEX));
+    }
   }
-  lastButtonState1 = buttonState1;
-  lastButtonState2 = buttonState2;
-      
+    content.toUpperCase();
   }
+  if (content.substring(1) == "70 60 48 A8") {
+    Serial.write("portfolio\n");
+  } else   {
+    Serial.println(" Access denied");
+    delay(700);
+  }  
+}
 
 
   
