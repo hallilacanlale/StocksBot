@@ -2,8 +2,7 @@
 #include <MFRC522.h>
 #define SS_PIN 10
 #define RST_PIN 9
-MFRC522 mfrc522(SS_PIN, RST_PIN); 
-
+MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
 const int RedBUTTON = 2;
 const int YellowBUTTON = 3;
 
@@ -23,43 +22,50 @@ void setup() {
 
 void loop() {
   buttonState1 = digitalRead(RedBUTTON);
+  
 
   if (buttonState1 && !buttonLast1) {
       Serial.write("red\n");
-  } else {
-    Serial.write("notred\n");
   }
   
   buttonState2 = digitalRead(YellowBUTTON);
 
   if (buttonState2 && !buttonLast2) {
       Serial.write("yellow\n");
-    } else {
-      Serial.write("notyellow\n");
-  }
-  
+    } 
 
   buttonLast1  = buttonState1;
   buttonLast2 = buttonState2;
-  
+
+
+
+
+
+
+  // Look for new cards
+  if ( ! mfrc522.PICC_IsNewCardPresent()) 
+  {
+    return;
+  }
   // Select one of the cards
-  if (mfrc522.PICC_ReadCardSerial()){
-    //Show UID on serial monitor
-    String content= "";
-    byte letter;
-    for (byte i = 0; i < mfrc522.uid.size; i++) {
-       content.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
-       content.concat(String(mfrc522.uid.uidByte[i], HEX));
-    }
+  if ( ! mfrc522.PICC_ReadCardSerial()) 
+  {
+    return;
   }
-    content.toUpperCase();
+  //Show UID on serial monitor
+  String content= "";
+  byte letter;
+  for (byte i = 0; i < mfrc522.uid.size; i++) 
+  {
+     content.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
+     content.concat(String(mfrc522.uid.uidByte[i], HEX));
   }
-  if (content.substring(1) == "70 60 48 A8") {
+  content.toUpperCase();
+  if (content.substring(1) == "70 60 48 A8") //change here the UID of the card/cards that you want to give access
+  {
     Serial.write("portfolio\n");
-  } else   {
-    Serial.println(" Access denied");
-    delay(700);
-  }  
+    delay(3000);
+  }
 }
 
 
