@@ -2,7 +2,7 @@
 const int buzzer = 10;
 const int RedLED = 9;
 const int GreenLED = 8;
-int iByte = null;
+int iByte = 9;
 const int rs = 11, en = 12, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 const int length = 12;
@@ -85,21 +85,21 @@ void ledSystem(int val) {
 
 
 
-void performWork(message2) {
-  if (strcmp(message, "portfolio") == 0) {
-        for (int i = 0; i < 3; i++) {
-          lcd.clear();
-          lcd.setCursor(0,0);
-          lcd.print(stocks[i].stock);
-          lcd.setCursor(0,1);
-          lcd.print(stocks[i].count, stocks[i].price);
-          lcd.setCursor(4, 1);
-          lcd.print(stocks[i].price);
-          delay(500);
-        }
-   }
-  
-}
+//void performWork(message2) {
+//  if (strcmp(message, "portfolio") == 0) {
+//        for (int i = 0; i < 3; i++) {
+//          lcd.clear();
+//          lcd.setCursor(0,0);
+//          lcd.print(stocks[i].stock);
+//          lcd.setCursor(0,1);
+//          lcd.print(stocks[i].count, stocks[i].price);
+//          lcd.setCursor(4, 1);
+//          lcd.print(stocks[i].price);
+//          delay(500);
+//        }
+//   }
+//  
+//}
 
 void loop() {
 
@@ -135,7 +135,13 @@ void loop() {
         // do work because red button clicked was read
         if (strcmp(message, "red") == 0) {
 
+          // make sure to call green blinking lights
 
+          // make sure to call BUY
+
+          // make sure to call red blinking lights 
+
+          // make sure to call SELL
           
           message_pos = 0;
           break;
@@ -144,7 +150,10 @@ void loop() {
 
         // do work because yellow button clicked
         if (strcmp(message, "yellow") == 0) {
-          
+          // make sure to call BUY with notifications
+
+          // make to call SELL with notifications
+
           message_pos = 0;
           break;
         }      
