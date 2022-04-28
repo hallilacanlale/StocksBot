@@ -7,6 +7,9 @@ const int rs = 11, en = 12, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 const int length = 12;
 char message2[length];
+bool AAPLval = true;
+
+bool BABAval = false;
 
 
 typedef struct {
@@ -16,6 +19,18 @@ typedef struct {
   int rsi[6];
   int ledVals[6];
 } Stock;
+
+
+int AAPLarray[8] = {1, 0, 1, 0, 0, 0, 1, 1};
+int AAPLrsi[8] = {60,18,10,50,35,88,40,85};
+
+//BABAarray[8} = {0, 0, 1, 0, 0, 0, 1, 1};
+//BABArsi[7} = {75,76,32,50,77,79,78};
+//
+//
+//
+
+
 
 Stock stocks[3] = {
   {"AAPL",2, 140.97, {60,78,50,28,35,90},  {10, 20, 18, 15, 19, 20}},
@@ -39,39 +54,34 @@ void setup() {
 }
 
 
-void notificationSystem(int val) {
-  if(val == 1)  { // buy
+void notificationSystem(int val, bool notify) {
+  if(val >= 70 )  { // buy
     lcd.clear();
-    lcd.print("BUY!!");
-    tone(buzzer, 1000); // Send 1KHz sound signal...
-    delay(600);        // ...for 1 sec
-    noTone(buzzer);     // Stop sound...
-    delay(600);        // ...for 1sec
-  }
+    lcd.print("BUY AAPL!!");
+  } else if (val <= 30) {
+      lcd.clear();
+      lcd.print("SELL AAPL!!");
+  }    
+    if (notify == true) {
+      tone(buzzer, 1000); // Send 1KHz sound signal...
+      delay(600);        // ...for 1 sec
+      noTone(buzzer);     // Stop sound...
+      delay(600);        // ...for 1sec
+    }
 
-  else if(val == 0)  { // sell
-    lcd.clear();
-    lcd.print("SELL!!");
-    tone(buzzer, 1000); // Send 1KHz sound signal...
-    delay(600);        // ...for 1 sec
-    noTone(buzzer);     // Stop sound...
-    delay(600);        // ...for 1sec
-  }
-  
-  
 }
 
 void ledSystem(int val) {
-  if(val == 1)  {
+  if(val == 1)  { //blink green
       digitalWrite(RedLED, LOW);
       lcd.clear();
       lcd.print("AAPL went up");
       digitalWrite( GreenLED , HIGH );
-      delay(600); 
+      delay(300); 
       digitalWrite(GreenLED, LOW);    // turn the LED off by making the voltage LOW
-      delay(600); 
+      delay(300); 
     }
-    else if(val == 0)  {
+    else if(val == 0)  { /// blink red
       digitalWrite( GreenLED, LOW);
       lcd.clear();
       lcd.print("AAPL went down");
@@ -83,23 +93,18 @@ void ledSystem(int val) {
 }
 
 
-
-
-//void performWork(message2) {
-//  if (strcmp(message, "portfolio") == 0) {
-//        for (int i = 0; i < 3; i++) {
-//          lcd.clear();
-//          lcd.setCursor(0,0);
-//          lcd.print(stocks[i].stock);
-//          lcd.setCursor(0,1);
-//          lcd.print(stocks[i].count, stocks[i].price);
-//          lcd.setCursor(4, 1);
-//          lcd.print(stocks[i].price);
-//          delay(500);
-//        }
-//   }
-//  
-//}
+void printPortfolio() {
+  for (int i = 0; i < 3; i++) {
+      lcd.clear();
+      lcd.setCursor(0,0);
+      lcd.print(stocks[i].stock);
+      lcd.setCursor(0,1);
+      lcd.print(stocks[i].count, stocks[i].price);
+      lcd.setCursor(4, 1);
+      lcd.print(stocks[i].price);
+      delay(800);
+  }
+}
 
 void loop() {
 
@@ -125,8 +130,8 @@ void loop() {
             lcd.print(stocks[i].count, stocks[i].price);
             lcd.setCursor(4, 1);
             lcd.print(stocks[i].price);
-            delay(500);
-          }
+            delay(800);
+        }
           message_pos = 0;
           break;
         }
@@ -134,26 +139,27 @@ void loop() {
 
         // do work because red button clicked was read
         if (strcmp(message, "red") == 0) {
-
-          // make sure to call green blinking lights
-
-          // make sure to call BUY
-
-          // make sure to call red blinking lights 
-
-          // make sure to call SELL
-          
-          message_pos = 0;
-          break;
+            for (int j = 0; j < 7; j++){
+              ledSystem(AAPLarray[j]);
+              delay(700);
+              // make sure to call BUY
+              notificationSystem(AAPLrsi[j], false);
+              delay(700);
+            }
+            message_pos = 0;
+            break;
         }
 
 
         // do work because yellow button clicked
         if (strcmp(message, "yellow") == 0) {
-          // make sure to call BUY with notifications
-
-          // make to call SELL with notifications
-
+            for (int j = 0; j < 7; j++){
+              ledSystem(AAPLarray[j]);
+              delay(700);
+              // make sure to call BUY
+              notificationSystem(AAPLrsi[j], true);
+              delay(700);
+            }
           message_pos = 0;
           break;
         }      
@@ -161,41 +167,4 @@ void loop() {
     }
   }
 
-//
-//   
-//   else {
-//  
-//     if (prevLEDVal > stocks[stockIndex].ledVals[ledIndex]) { //red 
-//        ledSystem(0);
-//    } else { //green
-//        ledSystem(1);
-//    }
-//    prevLEDVal = stocks[stockIndex].ledVals[ledIndex];
-//  
-//  
-//    //RSI output
-//    if (stocks[stockIndex].ledVals[ledIndex] >= 30) { 
-//        //buy
-//        notificationSystem(1);
-//    } else if (stocks[stockIndex].ledVals[ledIndex] >= 70) {
-//       notificationSystem(0);
-//    }
-//  
-//  
-//    //index validations
-//    if (stockIndex == 3){
-//      stockIndex = 0;
-//    } else {
-//      stockIndex++; 
-//    }
-//   if (ledIndex == 5){
-//      ledIndex = 0;
-//    } else {
-//      ledIndex++; 
-//    }
-//  
-//  
-//  
-//    delay(100);
-//   }
 }
