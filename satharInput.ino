@@ -6,7 +6,6 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);   // Create MFRC522 instance.
 const int RedBUTTON = 2;
 const int YellowBUTTON = 3;
 
-
 int buttonState1;
 int buttonState2;
 int buttonLast1;
@@ -23,7 +22,6 @@ void setup() {
 void loop() {
   buttonState1 = digitalRead(RedBUTTON);
   
-
   if (buttonState1 && !buttonLast1) {
       Serial.write("red\n");
   }
@@ -37,22 +35,16 @@ void loop() {
   buttonLast1  = buttonState1;
   buttonLast2 = buttonState2;
 
-
-
-
-
-
-  // Look for new cards
   if ( ! mfrc522.PICC_IsNewCardPresent()) 
   {
     return;
   }
-  // Select one of the cards
+  
   if ( ! mfrc522.PICC_ReadCardSerial()) 
   {
     return;
   }
-  //Show UID on serial monitor
+ 
   String content= "";
   byte letter;
   for (byte i = 0; i < mfrc522.uid.size; i++) 
@@ -60,10 +52,16 @@ void loop() {
      content.concat(String(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " "));
      content.concat(String(mfrc522.uid.uidByte[i], HEX));
   }
+  
   content.toUpperCase();
-  if (content.substring(1) == "70 60 48 A8") //change here the UID of the card/cards that you want to give access
+  if (content.substring(1) == "70 60 48 A8") // Make sure you change this with your own UID number
   {
     Serial.write("portfolio\n");
+    delay(3000);
+  }
+ 
+ else   {
+    Serial.println(" Access denied");
     delay(3000);
   }
 }
