@@ -15,4 +15,8 @@ This code for this bot can be broken into 3 different parts:
 
 That's it!
 
+
+## Documentation
 <img width="488" alt="image" src="https://user-images.githubusercontent.com/57775171/228615349-6abda4a6-3681-4217-ac70-c8345683f445.png">
+
+Here's the [youtube demo](https://youtu.be/zXrwrmLCtmM) and [documentation](https://github.com/hallilacanlale/StocksBot/blob/main/Stockbot_Documentation.pdf)!
